@@ -36,7 +36,7 @@ Usage:
 Explanation of the Data Structure:
 ==================================
 
-	The MetFile class has three attributes and two internal lists.  The attributes are: a version number ( usually 224, at least prior to Overnet 0.46 ), a modification date ( pretty much unused at the moment ) and an overall file hash ( this is what you see in an ed2k:// link - it's a sixteen byte array ).
+	The MetFile class has three attributes and two internal lists.  The attributes are: a version number ( usually 224, at least prior to Overnet 0.46.  From that point on, it seems to be 225. ), a modification date ( pretty much unused at the moment ) and an overall file hash ( this is what you see in an ed2k:// link - it's a sixteen byte array ).
 
 	These are represented with public member variables .version, .modDate and .fileID respectively.
 
@@ -49,21 +49,21 @@ Meta Tags:
 
 	The .part.met file uses a flexible and extensible system of meta-tags to store various pieces of information in the file ( such as how much of it has been downloaded so far ).  The general rule is that a meta-tag consists of a type, a title, and a value.  Tag titles with a length of one are generally an unprintable character and represent a special tag:
 
-	0x01 = Filename.         ( TAG_HANDLE_FILENAME )
-	0x02 = Filesize.         ( TAG_HANDLE_FILESIZE )
-	0x03 = Filetype.         ( TAG_HANDLE_FILETYPE )
-	0x04 = File Format.      ( TAG_HANDLE_FILEFORMAT )
-	0x08 = Bytes downloaded. ( TAG_HANDLE_SOFAR )
-	0x18 = Temp file name.   ( TAG_HANDLE_TEMP_NAME )
-	0x19 = Priority.	 ( TAG_HANDLE_PRIORITY )
-	0x20 = Paused.		 ( TAG_HANDLE_PAUSED )
+	  01 = Filename.         ( TAG_HANDLE_FILENAME )
+	  02 = Filesize.         ( TAG_HANDLE_FILESIZE )
+	  03 = Filetype.         ( TAG_HANDLE_FILETYPE )
+	  04 = File Format.      ( TAG_HANDLE_FILEFORMAT )
+	  08 = Bytes downloaded. ( TAG_HANDLE_SOFAR )
+	  18 = Temp file name.   ( TAG_HANDLE_TEMP_NAME )
+	  20 = Paused.		 ( TAG_HANDLE_PAUSED )
+	  24 = Priority.	 ( TAG_HANDLE_PRIORITY )
 
 	Fig 1 - a sadly incomplete list of meta tag special tag handles.
 
 	This list gives the byte representation, english name, and a defined variable inside the library you can use to refer to it ( see the examples ).  As usual, there are exceptions.
 
-	0x09 = File gap begins.  ( TAG_HANDLE_GAP_START )
-	0x10 = File gap ends.    ( TAG_HANDLE_GAP_END )
+	  09 = File gap begins.  ( TAG_HANDLE_GAP_START )
+	  10 = File gap ends.    ( TAG_HANDLE_GAP_END )
 
 	Fig 2 - rulebreaking dissident tags, bringers of heart-break.
 
@@ -73,7 +73,7 @@ Meta Tags:
 
 	MetaTag data can be accessed via member variables .name and .value.
 
-	To obtain a list of, or remove, given tags from a MetFile instance, use the FindTags or PurgeTags member functions.  They take an argument of the tag title in question.  Astute readers will have noticed this will be a problem with tags 0x09 and 0x10, as you need to know the number of the gap to be able to pinpoint its paired relevant tags.  A shortcut, if you wish to specify ALL tags in this class, has been provided - pass a second argument of '1' to the above two functions.
+	To obtain a list of, or remove, given tags from a MetFile instance, use the FindTags or PurgeTags member functions.  They take an argument of the tag title in question.  Astute readers will have noticed this will be a problem with tags 09 and 10, as you need to know the number of the gap to be able to pinpoint its paired relevant tags.  A shortcut, if you wish to specify ALL tags in this class, has been provided - pass a second argument of '1' to the above two functions.
 
 	When this 1 is passed, and the tag title specified is one character long, it will attempt to match the candidate keys on their first character.  This works well.  ( Again, see the sofar example for more detail ).
 
