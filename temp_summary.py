@@ -3,10 +3,14 @@ from ed2k_metutils import *
 import os
 import stat
 
-# I'm really surprised there's no easy way to get the terminal
-# width in python... :-/  I can't do external invocations to
-# stty, etc, because they might not be there on windows... 
-WIDTH = 80;
+try:
+	# Not sure if Curses can be invoked everywhere.
+	import curses
+	win = curses.initscr();
+	None, WIDTH = win.getmaxyx();
+	curses.endwin();
+except:
+	WIDTH = 80;
 
 if __name__ == "__main__":
 	# Here's an example to cut and keep.
@@ -18,10 +22,7 @@ if __name__ == "__main__":
 		print "invocation: %s < <x.part.met> [x.part.met ...] | <temp_dir> >" % sys.argv[ 0 ];
 		print
 		print "This program will show the amount downloaded vs. the total size "
-		print "for the .part.met files listed on the command line." 
-		print
-		print "This program assumes an 80 column display.  You can tweak this "
-		print "by editing the script.  Change the 'WIDTH' value."
+		print "for the .part.met files or directory listed on the command line." 
 		sys.exit( -1 );
 	
 	total_size = total_down = 0;
