@@ -7,25 +7,27 @@ import re
 if __name__ == "__main__":
 	
 	if len( sys.argv ) < 3:
-		print "invocation: %s temp-directory ed2k://link" % sys.argv[ 0 ];
-		print
-		print "This script creates a new .part.met file in the directory of the first"
-		print "argument, which represents the ed2k:// link provided as the second arg."
-		print
-		print "Useful for adding things to your download list without actually opening "
-		print "Overnet / Donkey."
-		print
+		print "invocation: %s [temp-directory] [ed2k://...]" % sys.argv[ 0 ];
+		print ;
+		print "This script creates a new .part.met file in the directory of the first";
+		print "argument, which represents the ed2k:// link provided as the second arg.";
+		print ;
+		print "Useful for adding things to your download list without actually opening ";
+		print "Overnet / Donkey.";
+		print ;
 		sys.exit( -1 );
 	
 	temp_dir = sys.argv[ 1 ];
 	ed2k_link = sys.argv[ 2 ];
 		
 	# Verify ed2k:// link.  Goddamn plague of backslashes.
-	ed2k_reg = re.compile( "ed2k://\|file\|([^|]+)\|(\d+)\|([a-fA-F0-9]{32})\|" )
+	ed2k_reg = re.compile( "ed2k://\|file\|([^|]+)\|(\d+)\|([a-fA-F0-9]{32})\|" );
 	matches = ed2k_reg.findall( ed2k_link );
 	
 	if not matches:
-		print "Oh no!  %s does not appear to be a valid ed2k:// link!" % ( ed2k_link );
+		print "Oh no!  This ( %s ) doesn't feel like an ed2k link!" % ( ed2k_link );
+		print "ed2k file links have the form:";
+		print "   ed2k://|file|<file name>|<file size>|<md4 hash>|";
 		sys.exit( -1 );
 	
 	name, size, hash = ed2k_reg.findall( ed2k_link )[ 0 ];
