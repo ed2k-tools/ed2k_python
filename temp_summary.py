@@ -12,6 +12,15 @@ try:
 except:
 	WIDTH = 80;
 
+def reformatBytes( nobytes ):
+	symbols = [ "", "K", "M", "G", "T" ];
+	index = 0;
+	while nobytes > 1024:
+		nobytes /= 1024.0;
+		index += 1;
+	return "%.2f%s" % ( nobytes, symbols[ index ] );
+
+
 if __name__ == "__main__":
 	# Here's an example to cut and keep.
 	#
@@ -77,7 +86,7 @@ if __name__ == "__main__":
 			bar = bar[ : char_gap_start ] + " " * ( char_gap_end - char_gap_start ) + bar[ char_gap_end : ];
 				
 		# Print out our summary.  Limit the filenames.
-		sizestring = " - %s - %iK of %iK" % ( met_file.split( "/" )[ -1 ], down / 1024, size / 1024 );
+		sizestring = " - %s - %s of %s ( %02.2f%% )" % ( met_file.split( "/" )[ -1 ], reformatBytes( down ), reformatBytes( size ),  100.0 * down / size );
 		max_name_size = WIDTH - len( sizestring );
 		if len( name ) < max_name_size:
 			name += " " * ( max_name_size - len( name ) );
@@ -87,4 +96,4 @@ if __name__ == "__main__":
 		print "[%s]" % bar;
 		print 
 		del( met_data );
-	print "Totals: %sK of %sK" % ( total_down / 1024, total_size / 1024 );
+	print "Totals: %s of %s" % ( reformatBytes( total_down ), reformatBytes( total_size ) );
