@@ -40,7 +40,7 @@ Explanation of the Data Structure:
 
 	These are represented with public member variables .version, .modDate and .fileID respectively.
 
-	The first list contains a set of partial hashes, derived, I believe, from other users on the network.  There should be one of these for each 9mb or so of the file ( FIXME: track down exact figure ).  As these really shouldn't be played with too much ( unless you are trying to MD4 verify individual 9mb blocks within a file ), they don't have helper methods - just tweak the .p_hashes member array.
+	The first list contains a set of partial hashes, derived, I believe, from other users on the network.  There should be one of these for each 9728000 bytes.  As these really shouldn't be played with too much ( unless you are trying to MD4 verify individual 9mb blocks within a file ), they don't have helper methods - just tweak the .p_hashes member array.
 
 	The second list is the meta tags.  These get their own section.
 
