@@ -31,13 +31,16 @@ if __name__ == "__main__":
 		print
 		sys.exit( -1 );
 	
-	if sys.argv[ 1 ] == "-f":
+	# Throw away argv[ 0 ].
+	args = sys.argv[ 1 : ];
+
+	if args[ 0 ] == "-f":
 		force = 1;
-		sys.argv = sys.argv[ 1: ];
+		args = args[ 1: ];
 	else:
 		force = 0;
 	
-	for met_file in sys.argv[ 1 : ]:
+	for met_file in args:
 		
 		fh = open( met_file, "r" );
 		data = fh.read();

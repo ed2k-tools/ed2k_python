@@ -1,3 +1,6 @@
+Update: recently, I've updated the code for the new 0.49 series .met file format.  If you still require access to .met files generated or
+modified by earlier versions, please use CVS to check out older versions.
+
 ed2k_python
 ===========
 
@@ -23,16 +26,14 @@ Usage
 
  To get started writing programs with the framework, I recommend reviewing the example programs.  They demonstrate most of the functionality you are likely to be using.  A basic understanding of the file format will also be helpful ( a sketchy outline is provided further on in the document ).
 
- As for the example implementations and non-met programs, running them without arguments should provide you with usage instructions and a brief rundown of the provided functionality.  None of these programs will overwrite files - if they are designed to reprocess existing files into another form ( for example, fix_sofar ), they will write results to files with identical filenames and a suffix of .new.
+ As for the example implementations and non-met programs, running them without arguments should provide you with usage instructions and a brief rundown of the provided functionality.  None of these programs will overwrite files - if they are designed to reprocess existing files into another form ( for example, fix_sofar ), they will write results to files with identical filenames and a suffix of .new. ( Addendum: by popular demand, fix_sofar.py has gained a -f switch, "force", which will overwrite the original files with the corrected ones.  It is *unsupported*. )
 
 Data Structure
 ==============
 
- The MetFile class has three attributes and two internal lists.  The attributes are: a version number ( historically 224 for overnet <0.46, 225 to the present ), a modification date ( pretty much unused at the moment ) and an overall file hash ( this is what you see in an ed2k:// link - it's a sixteen byte array ).
+ The MetFile class has four attributes and an internal list.  The attributes are: a version number ( historically 224 for overnet <0.46, 225 to the present ), a modification date ( pretty much unused at the moment ), an overall file hash ( this is what you see in an ed2k:// link - it's a sixteen byte array ) and a glob of opaque data representing partial file hashes and 'cookie' hashes.
 
- The first list contains a set of partial hashes, derived, I believe, from other users on the network.  There should be one of these for each 9728000 bytes.  As these really shouldn't be played with too much ( unless you are trying to MD4 verify individual 9mb blocks within a file ), they don't have helper methods - just tweak the .p_hashes member array directly.
-
- The second list is the meta tags, where most of the interest lies.  The general rule is that a meta-tag consists of a type ( TAG_TYPE_INTEGER / TAG_TYPE_STRING - floats, etc are stored as strings ), a title, and a value.  Tag titles with a length of one are generally an unprintable character and represent a special tag:
+ The list is the meta tags, where most of our interest generally lies.  The general rule is that a meta-tag consists of a type ( TAG_TYPE_INTEGER / TAG_TYPE_STRING - floats, etc are stored as strings ), a title, and a value.  Tag titles with a length of one are generally an unprintable character and represent a special tag:
 
 	  01 = Filename.         ( TAG_HANDLE_FILENAME )
 	  02 = Filesize.         ( TAG_HANDLE_FILESIZE )
@@ -57,7 +58,7 @@ Data Structure
 Development Environment
 =======================
 
- MacOSX 10.2.5 + Python 2.2 + Overnet 0.42 -> 0.47.1
+ MacOSX 10.2.5 + Python 2.2 + Overnet 0.42 -> 0.49.5
  VIM. 
 
 File format References
@@ -66,3 +67,4 @@ File format References
  http://www.schrevel.com/edonkey/
  http://www.edonkey2000.com/phpBB/viewtopic.php?topic=1716&forum=11
  ed2k_gtk_gui sources.
+ hexdump -C
