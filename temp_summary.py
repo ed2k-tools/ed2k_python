@@ -1,6 +1,11 @@
 #!/usr/bin/python
 from ed2k_metutils import *
 
+# I'm really surprised there's no easy way to get the terminal
+# width in python... :-/  I can't do external invocations to
+# stty, etc, because they might not be there on windows... 
+WIDTH = 80;
+
 if __name__ == "__main__":
 	# Here's an example to cut and keep.
 	#
@@ -8,27 +13,16 @@ if __name__ == "__main__":
 	# see how much data I actually got from night to night.
 	
 	if len( sys.argv ) < 2:
-		print "invocation: %s [-quiet] [x.part.met ...]" % sys.argv[ 0 ];
+		print "invocation: %s <x.part.met> [x.part.met ...]" % sys.argv[ 0 ];
 		print
 		print "This program will show the amount downloaded vs. the total size "
-		print "for the .part.met files listed on the command line.  It relies on"
-		print "the 0x08 'sofar' tag being set however - mac users check out the"
-		print "documentation for fix_sofar.py!"
+		print "for the .part.met files listed on the command line." 
 		print
-		print "If you pass it the argument '-quiet' as the first argument, it will"
-		print "only print the grand total.  Useful to see how much you got since"
-		print "last time you checked."
-		print
+		print "This program assumes an 80 column display.  You can tweak this "
+		print "by editing the script.  Change the 'WIDTH' value."
 		sys.exit( -1 );
 	
-	total_size = 0;
-	total_down = 0;	
-
-	if sys.argv[ 1 ] == '-quiet':
-		sys.argv.remove( '-quiet' );
-		quiet = 1;
-	else:
-		quiet = 0;
+	total_size = total_down = 0;
 	
 	for met_file in sys.argv[ 1 : ]:
 		
@@ -39,22 +33,49 @@ if __name__ == "__main__":
 		met_data = MetFile( data );
 		del( data );
 		
+		# We're interested in the name, the total size, and some kind of... anti-gapping.
 		size = met_data.FindTags( TAG_HANDLE_FILESIZE )[ 0 ].value;
-		down = met_data.FindTags( TAG_HANDLE_SOFAR )[ 0 ].value;
 		name = met_data.FindTags( TAG_HANDLE_FILENAME )[ 0 ].value;
 		
+		# Set the total downloaded to the file size.
+		down = size;
+		
+		gap_starts = met_data.FindTags( TAG_HANDLE_GAP_START, 1 );
+		gap_ends   = met_data.FindTags( TAG_HANDLE_GAP_END, 1 );
+		gaps = {};
+		
+		# Build gap lists.
+		for gap in gap_starts:
+			gap_id = gap.name[ 1 : ];
+			gaps[ gap_id ] = gap.value;
+		for gap in gap_ends:
+			gap_id = gap.name[ 1 : ];
+			gaps[ gap_id ] = ( gaps[ gap_id ], gap.value );
+			gap_length = gaps[ gap_id ][ 1 ] - gaps[ gap_id ][ 0 ];
+			# Adjust downloaded figure.
+			down -= gap_length;
+		
 		total_size += size;
-		total_down += down;
-		
-		if quiet == 0:
-			down2 = down / 1024;
-			size2 = size / 1024;
-			print "%s%s%iK/%iK ( %s )" % ( name, ' ' * ( 80 - len( name ) - len( str( down2 ) ) - len( str( size2 ) ) - 1 ), down2, size2, met_file );
-		
+		total_down += down;		
+
+		# If we have two endcaps, that leaves 78 characters to represent "size" bytes.
+		bytes_per_char = size / ( WIDTH - 2 );
+		bar = "#" * ( WIDTH - 2 );
+		for gap in gaps:
+			gap_start, gap_end = gaps[ gap ];
+			char_gap_start = gap_start / bytes_per_char;
+			char_gap_end = gap_end / bytes_per_char;
+			bar = bar[ : char_gap_start ] + " " * ( char_gap_end - char_gap_start ) + bar[ char_gap_end : ];
+				
+		# Print out our summary.  Limit the filenames.
+		sizestring = " - %s - %iK of %iK" % ( met_file.split( "/" )[ -1 ], down / 1024, size / 1024 );
+		max_name_size = WIDTH - len( sizestring );
+		if len( name ) < max_name_size:
+			name += " " * ( max_name_size - len( name ) );
+		else:
+			name = name[ : max_name_size ];
+		print "%s%s" % ( name, sizestring );
+		print "[%s]" % bar;
+		print 
 		del( met_data );
-	
-	if quiet == 0: 
-		print
-	total_size /= 1024;
-	total_down /= 1024;
-	print "Total:%s%iK/%iK" % ( ' ' * ( 73 - len( str( total_down ) ) - len( str( total_size ) ) ), total_down, total_size );
+	print "Totals: %sK of %sK" % ( total_down / 1024, total_size / 1024 );
