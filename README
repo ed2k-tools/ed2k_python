@@ -3,13 +3,7 @@ ed2k_python
 
  The main goal of this package of software is to provide a framework for writing your own applications to manipulate the .part.met files ( download meta-information ) created by the eDonkey 2000 and Overnet peer to peer file trading packages.
 
- There are also several useful example programs provided, which will be the only reason some people use the package for.  Finally, there are some Python programs that useful when used with eDonkey and Overnet, but are not related to .part.met files directly.  This began as a side project and is now the main direction of development.
-
- The Python module for working with the .met files is called ed2k_metutils.py
-
- The non .met related programs are in /non-met/
-
- The example programs are the .py files in the root directory that are not the module. ;-) 
+ Package contents: There is of course, the module, ed2k_metutils.py.  There are also several example programs provided, which you may find useful even if you don't intend to do any development.  Finally, there is a Python implementation of the useful core shutdown program, although this does not relate in any way to the .met files themselves.  This resides in ./non-met/, and other ed2k relevant but non .met python programs may be added to this set in the future.
 
 License
 =======
@@ -22,28 +16,23 @@ License
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
- This license was taken from the dlCompat package - thank you.
+ This BSD derived license was taken from the kind developers of the dlCompat package - thank you.
 
 Usage
 =====
 
- Most of what you need to know to start writing programs can be gleaned from the module comments and the example programs.  An understanding of the file format won't hurt either ( this will be explained further down the document ).
+ To get started writing programs with the framework, I recommend reviewing the example programs.  They demonstrate most of the functionality you are likely to be using.  A basic understanding of the file format will also be helpful ( a sketchy outline is provided further on in the document ).
 
- For the example programs and non-met programs, running them without arguments should provide you with usage instructions and an explanation of what they do.  None of these programs will overwrite files ( although they may create new ones ).  For a program like fix_sofar, it will put the fixed files in $x.new, where $x is the original filename.
-
-A Note about Passwords
-======================
-
- If you're using the core shutdown tool, it connects on the admin port ( 4663 ).  Traditionally, you need to set a username and password to allow connections on the admin control port.  For some reason, on recent OSX builds are missing the commands to set these parameters ( you can in principle manually edit them into pref.met ).  Unfortunately, until you do, it seems to accept '' as the username and password.  This in principle means other people can log into your core and make changes.  Not cool.
+ As for the example implementations and non-met programs, running them without arguments should provide you with usage instructions and a brief rundown of the provided functionality.  None of these programs will overwrite files - if they are designed to reprocess existing files into another form ( for example, fix_sofar ), they will write results to files with identical filenames and a suffix of .new.
 
 Data Structure
 ==============
 
- The MetFile class has three attributes and two internal lists.  The attributes are: a version number ( usually 224, at least prior to Overnet 0.46.  From that point on, it seems to be 225. ), a modification date ( pretty much unused at the moment ) and an overall file hash ( this is what you see in an ed2k:// link - it's a sixteen byte array ).
+ The MetFile class has three attributes and two internal lists.  The attributes are: a version number ( historically 224 for overnet <0.46, 225 to the present ), a modification date ( pretty much unused at the moment ) and an overall file hash ( this is what you see in an ed2k:// link - it's a sixteen byte array ).
 
- The first list contains a set of partial hashes, derived, I believe, from other users on the network.  There should be one of these for each 9728000 bytes.  As these really shouldn't be played with too much ( unless you are trying to MD4 verify individual 9mb blocks within a file ), they don't have helper methods - just tweak the .p_hashes member array.
+ The first list contains a set of partial hashes, derived, I believe, from other users on the network.  There should be one of these for each 9728000 bytes.  As these really shouldn't be played with too much ( unless you are trying to MD4 verify individual 9mb blocks within a file ), they don't have helper methods - just tweak the .p_hashes member array directly.
 
- The second list is the meta tags.  The general rule is that a meta-tag consists of a type ( TAG_TYPE_INTEGER / TAG_TYPE_STRING - floats, etc are stored as strings ), a title, and a value.  Tag titles with a length of one are generally an unprintable character and represent a special tag:
+ The second list is the meta tags, where most of the interest lies.  The general rule is that a meta-tag consists of a type ( TAG_TYPE_INTEGER / TAG_TYPE_STRING - floats, etc are stored as strings ), a title, and a value.  Tag titles with a length of one are generally an unprintable character and represent a special tag:
 
 	  01 = Filename.         ( TAG_HANDLE_FILENAME )
 	  02 = Filesize.         ( TAG_HANDLE_FILESIZE )
@@ -54,20 +43,22 @@ Data Structure
 	  20 = Paused.		 ( TAG_HANDLE_PAUSED )
 	  24 = Priority.	 ( TAG_HANDLE_PRIORITY )
 
- The TAG_ names are defined in the module for you to use as symbolic handles.  As usual, however, there are exceptions to the special tag rules:
+ The TAG_ names are defined in the module for you to use as symbolic handles.  As you might expect, however, there are exceptions to these special tag rules:
 
 	  09 = File gap begins.  ( TAG_HANDLE_GAP_START )
 	  10 = File gap ends.    ( TAG_HANDLE_GAP_END )
 
- These are special tags, but have tag title lengths != 1.  The form here is the special tag character, followed by an ascii number.  These numbers group tag beginnings and endings into matching pairs ( see the fix_sofar example to see this in action ).  Because of the variable names, you can pass a special second argument of '1' to the FindTags and PurgeTags helper functions - these will then only match on the first byte, which is the same for all TAG_HANDLE_GAP_START tags, for example.  Check out fix_sofar or temp_summary for more insights. 
+ These are special tags, but have tag title lengths != 1.  The form here is the special tag character, followed by an ascii number.  These numbers group tag beginnings and endings into matching pairs ( see the fix_sofar example to see this in action ).  
 
- Feel free to send me email if something is still unclear after consulting the examples and in module documentation strings.
+ Because of the variable length names, you can't just hook out all the tags with lengths equal to one and names equal to the TAG_ string as you might for other tags.  But you can pass a special second argument of '1' to the FindTags and PurgeTags helper functions - these will then only match on the first byte, which is the same for all TAG_HANDLE_GAP_START tags, for example.  Check out the fix_sofar or temp_summary examples for further insights. 
+
+ Feel free to send me email if something is still unclear after consulting the examples and the module documentation strings, or if you have any suggestions!
 
 Development Environment
 =======================
 
  MacOSX 10.2.5 + Python 2.2 + Overnet 0.42 -> 0.47.1
- VIM.  The one true editor.
+ VIM. 
 
 File format References
 ======================
