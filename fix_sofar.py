@@ -11,7 +11,7 @@ if __name__ == "__main__":
 	# This will undo the damage.
 	
 	if len( sys.argv ) < 2:
-		print "invocation: %s <x.part.met> [x.part.met ...]" % sys.argv[ 0 ];
+		print "invocation: %s [ -f ] <x.part.met> [x.part.met ...]" % sys.argv[ 0 ];
 		print
 		print "Some versions of Overnet on MacOSX seem not to write the 0x08 'sofar' tag"
 		print "on exiting, this gives the appearance that the next time you boot overnet,"
@@ -23,10 +23,19 @@ if __name__ == "__main__":
 		print "file.  Copy these over the top of your originals if you're sure thats what"
 		print "you want to do."
 		print
+		print "-f as the first argument, 'force', will directly overwrite the files."
+		print "It is unsupported.  If it breaks your files, don't come to me about it."
+		print
 		print "Of course, Overnet will re-break these files on its next exit.  You'll"
 		print "need to run this program a lot to keep everything setup."
 		print
 		sys.exit( -1 );
+	
+	if sys.argv[ 1 ] == "-f":
+		force = 1;
+		sys.argv = sys.argv[ 1: ];
+	else:
+		force = 0;
 	
 	for met_file in sys.argv[ 1 : ]:
 		
@@ -61,8 +70,8 @@ if __name__ == "__main__":
 		
 		met_data.PurgeTags( TAG_HANDLE_SOFAR );
 		met_data.AddTag( MetaTag( TAG_HANDLE_SOFAR, so_far, TAG_TYPE_INTEGER ) );
-			
-		fh = open( "%s.new" % met_file, "w" );
+		if force: fh = open( "%s" % met_file, "w" );
+		else: fh = open( "%s.new" % met_file, "w" );
 		fh.write( met_data.ReduceToData() );
 		fh.close();
 		del( met_data );
