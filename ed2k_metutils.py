@@ -22,8 +22,8 @@ TAG_HANDLE_SOFAR      = chr( 8 );
 TAG_HANDLE_GAP_START  = chr( 9 );
 TAG_HANDLE_GAP_END    = chr( 10 );
 TAG_HANDLE_TEMP_NAME  = chr( 18 );
-TAG_HANDLE_PRIORITY   = chr( 19 );
 TAG_HANDLE_PAUSED     = chr( 20 );
+TAG_HANDLE_PRIORITY   = chr( 24 );
 
 class MetFile:
 	"""Class designed to hold the data of a .part.met file."""
@@ -34,7 +34,10 @@ class MetFile:
 		self.m_tags = [];
 		
 		if not dstore:
-			self.version = 224;
+			# 224 for old Overnet, 225 for new.
+			# The only noticible difference so far is that if a download specifies 'old overnet',
+			# a .part file must exist, even if it's empty.  The same doesn't apply for new overnet.
+			self.version = 225;
 			self.modDate = 0;
 			self.fileID = '\0' * 16; 
 			return;

@@ -55,15 +55,20 @@ if __name__ == "__main__":
 	new.fileID = new_hash;
 	new.AddTag( MetaTag( TAG_HANDLE_FILENAME, name ) );
 	new.AddTag( MetaTag( TAG_HANDLE_FILESIZE, size ) );	
-	new.AddTag( MetaTag( TAG_HANDLE_TEMP_NAME, "%i.part" % ( prospective[ 0 ] ) ) );
 	new.AddTag( MetaTag( TAG_HANDLE_SOFAR, 0 ) );
-	new.AddTag( MetaTag( TAG_HANDLE_GAP_START, 0 ) );
-	new.AddTag( MetaTag( TAG_HANDLE_GAP_END, size - 1 ) );
+	# Now, I thought this implied an off-by-one error ( if a file is
+	# five bytes long, the gap should go from byte 0 to byte 4... ),
+	# but apparently that's not how we do it here.
+	new.AddTag( MetaTag( "%s0" % TAG_HANDLE_GAP_START, 0 ) );
+	new.AddTag( MetaTag( "%s0" % TAG_HANDLE_GAP_END, size ) );
+	new.AddTag( MetaTag( TAG_HANDLE_PAUSED, 0 ) );
+	new.AddTag( MetaTag( TAG_HANDLE_PRIORITY, 1 ) );
 
 	# Write it out.
 	fh = open( filename, "w" );
 	fh.write( new.ReduceToData() );
 	fh.close();
+
 	del( new );
 
-	print "Wrote meta for %s to %s." % ( ed2k_link, filename );	
+	print "Wrote met for %s to %s." % ( ed2k_link, filename );	
