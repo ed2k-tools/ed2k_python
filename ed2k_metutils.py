@@ -30,32 +30,20 @@ class MetFile:
 	
 	def __init__( self, dstore = None ):
 		"""Construct a metfile class from a data stream, which is just read straight from disk, or as a blank."""
-		self.p_hashes = [];
+		self.p_hash_data = "";
 		self.m_tags = [];
 		
 		if not dstore:
-			# 224 for old Overnet, 225 for new.
-			# The only noticible difference so far is that if a download specifies 'old overnet',
-			# a .part file must exist, even if it's empty.  The same doesn't apply for new overnet.
 			self.version = 225;
 			self.modDate = 0;
 			self.fileID = '\0' * 16; 
 			return;
 			
-		header_struct = "<BI16sH";
+		header_struct = "<HI16sI";
 		header_size = struct.calcsize( header_struct );
 		
-		self.version, self.modDate, self.fileID, numhashes = struct.unpack( header_struct, dstore[ 0 : header_size ] );
-		
+		self.version, self.modDate, self.fileID, n_meta = struct.unpack( header_struct, dstore[ : header_size ] );
 		dstore = dstore[ header_size : ];
-		
-		for i in range( numhashes ):
-			p_hash, = struct.unpack( "<16s", dstore[ : 16 ] );
-			self.p_hashes.append( p_hash );
-			dstore = dstore[ 16 : ];
-			
-		n_meta, = struct.unpack( "<I", dstore[ : 4 ] );
-		dstore = dstore[ 4 : ];
 		
 		for meta in range( n_meta ):
 			t_type, = struct.unpack( "<B", dstore[ 0 ] );
@@ -74,8 +62,9 @@ class MetFile:
 				dstore = dstore[ 2 : ];
 				value, = struct.unpack( "<%is" % value_len, dstore[ : value_len ] );
 				dstore = dstore[ value_len : ];
-			
 			self.AddTag( MetaTag( name, value, t_type ) );
+		
+		if( len( dstore ) ): self.p_hash_data = dstore;
 			
 	def getMD4( self ):
 		"""Return a string representation of the file MD4."""
@@ -92,13 +81,11 @@ class MetFile:
 		
 	def ReduceToData( self ):
 		"""Reduce a class instance back into a stream suitable for writing to disk."""
-		header_struct = "<BI16sH";
-		data = struct.pack( header_struct, self.version, self.modDate, self.fileID, len( self.p_hashes ) );
-		for hash in self.p_hashes:
-			data += struct.pack( "<16s", hash );
-		data += struct.pack( "<I", len( self.m_tags ) );
+		header_struct = "<HI16sI";
+		data = struct.pack( header_struct, self.version, self.modDate, self.fileID, len( self.m_tags ) );
 		for tag in self.m_tags:
 			data += tag.ReduceToData();
+		data += self.p_hash_data;
 		return data;
 	
 	def AddTag( self, tag ):
@@ -143,5 +130,3 @@ class MetaTag:
 		else:
 			struct_format += "I";
 			return struct.pack( struct_format, self.tag_type, len( self.name ), self.name, self.value );
-
-

@@ -20,6 +20,15 @@ def reformatBytes( nobytes ):
 		index += 1;
 	return "%.2f%s" % ( nobytes, symbols[ index ] );
 
+def recurseListDir( path ):
+	bits = [ "%s/%s" % ( path, x ) for x in os.listdir( path ) ];
+	list = bits;
+	for bit in bits:
+		sta = os.stat( bit )[ 0 ];
+		if stat.S_ISDIR( sta ):
+			list.extend( recurseListDir( bit ) );
+	return list;
+		
 
 if __name__ == "__main__":
 	# Here's an example to cut and keep.
@@ -38,7 +47,7 @@ if __name__ == "__main__":
 	
 	sta = os.stat( sys.argv[ 1 ] )[ 0 ];
 	if stat.S_ISDIR( sta ):
-		mets = [ "%s%s" % ( sys.argv[ 1 ], x ) for x in os.listdir( sys.argv[ 1 ] ) if x.endswith( ".met" ) ];
+		mets = filter( lambda x: x.endswith( ".met" ), recurseListDir( sys.argv[ 1 ] ) );
 	else:
 		mets = sys.argv[ 1 : ];
 	
