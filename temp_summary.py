@@ -1,5 +1,7 @@
 #!/usr/bin/python
 from ed2k_metutils import *
+import os
+import stat
 
 # I'm really surprised there's no easy way to get the terminal
 # width in python... :-/  I can't do external invocations to
@@ -13,7 +15,7 @@ if __name__ == "__main__":
 	# see how much data I actually got from night to night.
 	
 	if len( sys.argv ) < 2:
-		print "invocation: %s <x.part.met> [x.part.met ...]" % sys.argv[ 0 ];
+		print "invocation: %s < <x.part.met> [x.part.met ...] | <temp_dir> >" % sys.argv[ 0 ];
 		print
 		print "This program will show the amount downloaded vs. the total size "
 		print "for the .part.met files listed on the command line." 
@@ -24,7 +26,13 @@ if __name__ == "__main__":
 	
 	total_size = total_down = 0;
 	
-	for met_file in sys.argv[ 1 : ]:
+	sta = os.stat( sys.argv[ 1 ] )[ 0 ];
+	if stat.S_ISDIR( sta ):
+		mets = [ "%s%s" % ( sys.argv[ 1 ], x ) for x in os.listdir( sys.argv[ 1 ] ) if x.endswith( ".met" ) ];
+	else:
+		mets = sys.argv[ 1 : ];
+	
+	for met_file in mets:
 		
 		fh = open( met_file, "r" );
 		data = fh.read();
