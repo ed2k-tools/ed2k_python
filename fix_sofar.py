@@ -11,7 +11,7 @@ if __name__ == "__main__":
 	# This will undo the damage.
 	
 	if len( sys.argv ) < 2:
-		print "invocation: %s [x.part.met ...]" % sys.argv[ 0 ];
+		print "invocation: %s <x.part.met> [x.part.met ...]" % sys.argv[ 0 ];
 		print
 		print "Some versions of Overnet on MacOSX seem not to write the 0x08 'sofar' tag"
 		print "on exiting, this gives the appearance that the next time you boot overnet,"

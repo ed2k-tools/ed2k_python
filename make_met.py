@@ -7,7 +7,7 @@ import re
 if __name__ == "__main__":
 	
 	if len( sys.argv ) < 3:
-		print "invocation: %s [temp-directory] [ed2k://...]" % sys.argv[ 0 ];
+		print "invocation: %s <temp-directory> <ed2k://...>" % sys.argv[ 0 ];
 		print ;
 		print "This script creates a new .part.met file in the directory of the first";
 		print "argument, which represents the ed2k:// link provided as the second arg.";

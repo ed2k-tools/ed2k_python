@@ -8,7 +8,7 @@ if __name__ == "__main__":
 	# you break one so badly all you want back is the ed2k:// hash.
 	
 	if len( sys.argv ) < 2:
-		print "invocation: %s [x.part.met ...]" % sys.argv[ 0 ];
+		print "invocation: %s <x.part.met> [x.part.met ...]" % sys.argv[ 0 ];
 		print
 		print "This program will print out the ed2k:// link responsible for"
 		print "the formation of a given .part.met file or files, given on "
