@@ -75,8 +75,7 @@ if __name__ == "__main__":
 		
 		total_size += size;
 		total_down += down;		
-
-		# If we have two endcaps, that leaves 78 characters to represent "size" bytes.
+		
 		bytes_per_char = size / ( WIDTH - 2 );
 		bar = "#" * ( WIDTH - 2 );
 		for gap in gaps:
