@@ -12,7 +12,7 @@ OP_SHUTDOWN = 0x65;
 def make_login_packet( username, password ):
 	"""Create a authentication packet."""
 	# This looks like so:
-	#	<length of username: 16bit><username><length of 
+	#	<length of username: 16bit><username><length of password: 16 bit><password>
 	packet = struct.pack( "<BH%isH%is" % ( len( username ), len( password ) ), OP_LOGIN, len( username ), username, len( password ), password );
 	# Hss hss.
 	return packet;
