@@ -1,0 +1,54 @@
+#!/usr/bin/python
+from ed2k_metutils import *
+
+if __name__ == "__main__":
+	# Here's an example to cut and keep.
+	#
+	# Overnet MacOSX 0.46.1 seems to annihilate the SOFAR tag ( 0x08 )
+	# whenever it exits ( more likely it does it at load time and never
+	# remembers to update the value on disk... ).
+	#
+	# This will undo the damage.
+	
+	if len( sys.argv ) < 2:
+		print "invocation: %s [x.part.met ...]" % sys.argv[ 0 ];
+		sys.exit( -1 );
+	
+	for met_file in sys.argv[ 1 : ]:
+		
+		fh = open( met_file, "r" );
+		data = fh.read();
+		fh.close();
+		
+		met_data = MetFile( data );
+		del( data );
+		
+		length = met_data.FindTags( TAG_HANDLE_FILESIZE )[ 0 ].value;
+		
+		# Restructure SOFAR - Build gap lists.
+		gap_starts = met_data.FindTags( TAG_HANDLE_GAP_START, 1 );
+		gap_ends   = met_data.FindTags( TAG_HANDLE_GAP_END, 1 );
+		
+		gaps = {};
+		for g_e in gap_ends:
+			gap_id = g_e.name[ 1 : ];
+			gaps[ gap_id ] = g_e.value;	
+		for g_s in gap_starts:
+			gap_id = g_s.name[ 1 : ];
+			gaps[ gap_id ] -= g_s.value;
+			
+		so_far = length;
+		for gap in gaps.keys():
+			so_far -= gaps[ gap ];
+		
+		print "%s: %s" % ( met_file, met_data.FindTags( TAG_HANDLE_FILENAME )[ 0 ].value );
+		print "MD4: %s" % ( met_data.getMD4() );
+		print "Obtained size / total: %i / %i" % ( so_far, length );
+		
+		met_data.PurgeTags( TAG_HANDLE_SOFAR );
+		met_data.AddTag( MetaTag( TAG_HANDLE_SOFAR, so_far, TAG_TYPE_INTEGER ) );
+			
+		fh = open( "%s.new" % met_file, "w" );
+		fh.write( met_data.ReduceToData() );
+		fh.close();
+		del( met_data );

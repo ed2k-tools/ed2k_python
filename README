@@ -1,0 +1,92 @@
+ed2k_metutils.py
+================
+
+	A python framework for easy manipulation of .part.met files ( edonkey and overnet download meta-information ).
+
+	This set of classes allows for rapid development of ed2k tools, using a very simple API.
+
+License:
+========
+
+	Copyright (c) 2003 Bryn Davies  <curious-au@users.sourceforge.net>
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	( License gutted from dlCompat, thank you. )
+
+Usage:
+======
+
+	There are ( at the time of writing ) three simple example progams included with the main class file.  You can use these as templates for your own work without attribution.  The basic pattern when writing a script with this library is:
+
+	* Import it.  ( I usually dirty the name space because of the long class prefixes otherwise. )
+	* Construct a MetFile class instance using a byte-stream read from disk or another source.
+	  [ You can also construct an empty met-file, and then populate it. ]
+	* Read and write "Tags" from the file ( explained later ).
+	* Call ReduceToData on the instance, and write the resulting byte stream to disk.
+	* ???
+	* Profit!
+
+	The data structure is actually pretty straight forward.  It's just that the implementation can be a bit fiddly - hence this library.  This kind of structure ( lists of hashes, some attributes, lists of tags ) is easy to work with an implement in python, because of the excellent list code.
+
+Explanation of the Data Structure:
+==================================
+
+	The MetFile class has three attributes and two internal lists.  The attributes are: a version number ( usually 224, at least prior to Overnet 0.46 ), a modification date ( pretty much unused at the moment ) and an overall file hash ( this is what you see in an ed2k:// link - it's a sixteen byte array ).
+
+	These are represented with public member variables .version, .modDate and .fileID respectively.
+
+	The first list contains a set of partial hashes, derived, I believe, from other users on the network.  There should be one of these for each 9mb or so of the file ( FIXME: track down exact figure ).  As these really shouldn't be played with too much ( unless you are trying to MD4 verify individual 9mb blocks within a file ), they don't have helper methods - just tweak the .p_hashes member array.
+
+	The second list is the meta tags.  These get their own section.
+
+Meta Tags:
+==========
+
+	The .part.met file uses a flexible and extensible system of meta-tags to store various pieces of information in the file ( such as how much of it has been downloaded so far ).  The general rule is that a meta-tag consists of a type, a title, and a value.  Tag titles with a length of one are generally an unprintable character and represent a special tag:
+
+	0x01 = Filename.         ( TAG_HANDLE_FILENAME )
+	0x02 = Filesize.         ( TAG_HANDLE_FILESIZE )
+	0x03 = Filetype.         ( TAG_HANDLE_FILETYPE )
+	0x04 = File Format.      ( TAG_HANDLE_FILEFORMAT )
+	0x08 = Bytes downloaded. ( TAG_HANDLE_SOFAR )
+	0x18 = Temp file name.   ( TAG_HANDLE_TEMP_NAME )
+	0x19 = Priority.	 ( TAG_HANDLE_PRIORITY )
+	0x20 = Paused.		 ( TAG_HANDLE_PAUSED )
+
+	Fig 1 - a sadly incomplete list of meta tag special tag handles.
+
+	This list gives the byte representation, english name, and a defined variable inside the library you can use to refer to it ( see the examples ).  As usual, there are exceptions.
+
+	0x09 = File gap begins.  ( TAG_HANDLE_GAP_START )
+	0x10 = File gap ends.    ( TAG_HANDLE_GAP_END )
+
+	Fig 2 - rulebreaking dissident tags, bringers of heart-break.
+
+	These are special tags, but have tag title lengths != 1.  The form here is the special tag character, followed by an ascii representation of a number.  These numbers group tag beginnings and endings into matching pairs ( see the fix_sofar example to see this in action ).
+
+	We add tags to MetFile instances by instantiating a MetaTag class with appropriate arguments.  You can't create blank MetaTags - they take instantiation arguments of a tag title, a tag value, and optionally a tag type, which should be TAG_TYPE_STRING or TAG_TYPE_INTEGER ( the only supported types in the specification - store floats as strings ) - very crappy type autodetection will be attempted if nothing is specified.
+
+	MetaTag data can be accessed via member variables .name and .value.
+
+	To obtain a list of, or remove, given tags from a MetFile instance, use the FindTags or PurgeTags member functions.  They take an argument of the tag title in question.  Astute readers will have noticed this will be a problem with tags 0x09 and 0x10, as you need to know the number of the gap to be able to pinpoint its paired relevant tags.  A shortcut, if you wish to specify ALL tags in this class, has been provided - pass a second argument of '1' to the above two functions.
+
+	When this 1 is passed, and the tag title specified is one character long, it will attempt to match the candidate keys on their first character.  This works well.  ( Again, see the sofar example for more detail ).
+
+	I think I've covered everything that needs to be dealt with here.  There are a few other little helper functions, notably getMD4, getEd2K, etc, but they are reasonably self-explanatory, and everything has a ( crappy ) doc-string.  Drop me a line if you need more information.
+
+Testing Environment:
+====================
+
+	MacOSX 10.2.4 + Python 2.2 + Overnet 0.42 -> 0.46.1
+	Prepared in VIM.
+
+References:
+===========
+	
+	http://www.schrevel.com/edonkey/
+	http://www.edonkey2000.com/phpBB/viewtopic.php?topic=1716&forum=11
