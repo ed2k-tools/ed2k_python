@@ -12,6 +12,20 @@ if __name__ == "__main__":
 	
 	if len( sys.argv ) < 2:
 		print "invocation: %s [x.part.met ...]" % sys.argv[ 0 ];
+		print
+		print "Some versions of Overnet on MacOSX seem not to write the 0x08 'sofar' tag"
+		print "on exiting, this gives the appearance that the next time you boot overnet,"
+		print "nothing has been downloaded.  It's only cosmetic, however."
+		print
+		print "If you want to create new .met files with this 'bug' corrected, run this"
+		print "program with the affected .met files as the command line arguments.  You"
+		print "will get new .met files titled X.new, where X was the original .part.met"
+		print "file.  Copy these over the top of your originals if you're sure thats what"
+		print "you want to do."
+		print
+		print "Of course, Overnet will re-break these files on its next exit.  You'll"
+		print "need to run this program a lot to keep everything setup."
+		print
 		sys.exit( -1 );
 	
 	for met_file in sys.argv[ 1 : ]:

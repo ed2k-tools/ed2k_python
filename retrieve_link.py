@@ -9,6 +9,11 @@ if __name__ == "__main__":
 	
 	if len( sys.argv ) < 2:
 		print "invocation: %s [x.part.met ...]" % sys.argv[ 0 ];
+		print
+		print "This program will print out the ed2k:// link responsible for"
+		print "the formation of a given .part.met file or files, given on "
+		print "the command line."
+		print
 		sys.exit( -1 );
 	
 	for met_file in sys.argv[ 1 : ]:

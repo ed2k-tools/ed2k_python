@@ -9,6 +9,16 @@ if __name__ == "__main__":
 	
 	if len( sys.argv ) < 2:
 		print "invocation: %s [-quiet] [x.part.met ...]" % sys.argv[ 0 ];
+		print
+		print "This program will show the amount downloaded vs. the total size "
+		print "for the .part.met files listed on the command line.  It relies on"
+		print "the 0x08 'sofar' tag being set however - mac users check out the"
+		print "documentation for fix_sofar.py!"
+		print
+		print "If you pass it the argument '-quiet' as the first argument, it will"
+		print "only print the grand total.  Useful to see how much you got since"
+		print "last time you checked."
+		print
 		sys.exit( -1 );
 	
 	total_size = 0;
